@@ -1,101 +1,106 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [memoList, setMemoList] = useState<string[]>([]);  // 메모 리스트 상태
+  const [newMemo, setNewMemo] = useState<string>("");  // 새 메모 입력 상태
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);  // 수정 중인 메모의 인덱스
+  const [showToast, setShowToast] = useState(false);
+  
+  // 1. 페이지 초기화 시 로컬 스토리지에서 메모 불러오기
+  useEffect(() => {
+    const storedMemos = JSON.parse(localStorage.getItem("memos") || "[]");
+    setMemoList(storedMemos);
+  }, []);  // 빈 배열을 두면 컴포넌트가 처음 마운트될 때만 실행
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // 2. 메모 리스트 상태가 변경될 때마다 로컬 스토리지에 저장하기
+  useEffect(() => {
+    if (memoList.length > 0) {
+      localStorage.setItem("memos", JSON.stringify(memoList));
+    }
+  }, [memoList]);  // memoList가 변경될 때마다 실행
+
+  const handleAddMemo = () => {
+    if (newMemo.trim()) {
+      const updatedMemos = [...memoList, newMemo];
+      setMemoList(updatedMemos);  // 새 메모 추가
+      setNewMemo("");  // 메모 추가 후 입력 필드 초기화
+    }
+  };
+
+  const handleEditMemo = (index: number) => {
+    setEditingIndex(index);  // 수정하려는 메모의 인덱스를 설정
+  };
+
+  const handleSaveMemo = (index: number, updatedMemo: string) => {
+    const updatedMemos = [...memoList];
+    updatedMemos[index] = updatedMemo;  // 메모 수정
+    setMemoList(updatedMemos);
+    setEditingIndex(null);  // 수정 완료 후 편집 모드 종료
+  };
+
+  const handleDeleteMemo = (index: number) => {
+    const updatedMemos = memoList.filter((_, i) => i !== index);  // 메모 삭제
+    setMemoList(updatedMemos);
+  };
+
+  const handleCopyMemo = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000); // 3초 후 자동 닫힘
+  };
+
+  return (
+    <div>
+      <h1>웹 메모장</h1>
+      <div>
+        <input
+          type="text"
+          value={newMemo}
+          onChange={(e) => setNewMemo(e.target.value)}
+          placeholder="새 메모를 입력하세요"
+        />
+        <button onClick={handleAddMemo}>메모 추가</button>
+      </div>
+
+      <ul>
+        {memoList.map((memo, index) => (
+          <li key={index}>
+            {editingIndex === index ? (
+              <div>
+                <input
+                  type="text"
+                  defaultValue={memo}
+                  onBlur={(e) => handleSaveMemo(index, e.target.value)}  // 수정 완료 시 저장
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <div>
+                <span>{memo}</span>
+                <CopyToClipboard
+                  text={memo}
+                >
+                  <button
+                    onClick={handleCopyMemo}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                  >
+                    복사
+                  </button>
+                </CopyToClipboard>
+                <button onClick={() => handleEditMemo(index)}>수정</button>
+                <button onClick={() => handleDeleteMemo(index)}>삭제</button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      {showToast && (
+        <div className="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded-md shadow-md">
+          복사 완료!
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
     </div>
   );
 }
