@@ -1,5 +1,5 @@
 1:HL["/insam16.github.io/_next/static/css/d7f5c36cf89b68e9.css","style",{"crossOrigin":""}]
-0:["WleWFYM0BISbLOkhJ9KRi",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/insam16.github.io/_next/static/css/d7f5c36cf89b68e9.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
+0:["e6X7WF2zJ1QvWRIyFUjUb",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/insam16.github.io/_next/static/css/d7f5c36cf89b68e9.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
 4:I[6954,[],""]
 5:I[7264,[],""]
 7:I[8297,[],""]
