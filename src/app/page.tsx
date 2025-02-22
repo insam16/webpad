@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -48,59 +48,89 @@ export default function Home() {
 
   const handleCopyMemo = () => {
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000); // 3초 후 자동 닫힘
+    setTimeout(() => setShowToast(false), 2000); // 3초 후 자동 닫힘
   };
 
   return (
-    <div>
-      <h1>웹 메모장</h1>
-      <div>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-5">
+      <h3 className="text-3xl font-bold text-blue-600 mb-5">📝 웹 메모장</h3>
+
+      <div className="bg-white shadow-md p-4 rounded-lg w-full max-w-lg">
         <input
           type="text"
           value={newMemo}
           onChange={(e) => setNewMemo(e.target.value)}
           placeholder="새 메모를 입력하세요"
+          className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button onClick={handleAddMemo}>메모 추가</button>
+        <button
+          onClick={handleAddMemo}
+          className="mt-2 w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition"
+        >
+          추가하기
+        </button>
       </div>
 
-      <ul>
+      <ul className="w-full max-w-lg mt-5">
         {memoList.map((memo, index) => (
-          <li key={index}>
+          <li
+            key={index}
+            className="bg-white shadow-md p-4 rounded-lg flex justify-between items-center mb-2"
+          >
             {editingIndex === index ? (
-              <div>
-                <input
-                  type="text"
-                  defaultValue={memo}
-                  onBlur={(e) => handleSaveMemo(index, e.target.value)}  // 수정 완료 시 저장
-                  autoFocus
-                />
-              </div>
+              <input
+                type="text"
+                defaultValue={memo}
+                onBlur={(e) => handleSaveMemo(index, e.target.value)}  // 수정 완료 시 저장
+                autoFocus
+                className="border w-full px-2 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             ) : (
-              <div>
-                <span>{memo}</span>
-                <CopyToClipboard
-                  text={memo}
-                >
-                  <button
-                    onClick={handleCopyMemo}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                  >
-                    복사
-                  </button>
-                </CopyToClipboard>
-                <button onClick={() => handleEditMemo(index)}>수정</button>
-                <button onClick={() => handleDeleteMemo(index)}>삭제</button>
-              </div>
+              <span className="text-gray-700">{memo}</span>
             )}
+
+            <div className="flex space-x-2">
+              <CopyToClipboard text={memo} onCopy={handleCopyMemo}>
+                <button className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition">
+                  📋
+                </button>
+              </CopyToClipboard>
+              <button
+                onClick={() => handleEditMemo(index)}
+                className="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={() => handleDeleteMemo(index)}
+                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+              >
+                  🗑️
+                </button>
+            </div>
           </li>
         ))}
       </ul>
+
+      {/* Toast message */}
       {showToast && (
         <div className="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded-md shadow-md">
-          복사 완료!
+          ✅ 복사 완료!
         </div>
       )}
+
+      {/* animation style */}
+      <style jsx>{`
+        @keyframes fade-in-out {
+          0% { opacity: 0; transform: translateY(-10px); }
+          10% { opacity: 1; transform: translateY(0); }
+          90% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-fade-in-out {
+          animation: fade-in-out 2s ease-in-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
